@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Entri Jurnal Akuntansi</title>
+    <!-- Load Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased py-8 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl overflow-hidden border border-slate-100">
+        
+        <!-- Header Section -->
+        <div class="bg-indigo-600 px-6 py-5 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">Entri Jurnal Umum</h1>
+                <p class="text-indigo-100 text-sm mt-0.5">Catat transaksi keuangan dengan akurat dan pastikan seimbang.</p>
+            </div>
+            <!-- Status Indicator Badge -->
+            <div id="balanceStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-rose-500 text-white shadow-sm flex items-center gap-1.5">
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                <span id="statusText">UNBALANCED</span>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <form id="journalForm" class="p-6 space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Tanggal Transaksi -->
+                <div>
+                    <label for="txDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Tanggal Transaksi</label>
+                    <input type="date" id="txDate" required 
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+                <!-- Nomor Referensi -->
+                <div>
+                    <label for="refNumber" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Nomor Referensi</label>
+                    <input type="text" id="refNumber" placeholder="Cth: JU-2026-001" required 
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+                <!-- Deskripsi / Keterangan -->
+                <div>
+                    <label for="txDescription" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Deskripsi / Keterangan</label>
+                    <input type="text" id="txDescription" placeholder="Cth: Pembayaran sewa gedung" required 
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Baris Jurnal Akuntansi</h2>
+                    <button type="button" id="addRowBtn" 
+                        class="inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3.5 py-1.5 rounded-lg text-xs transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                        Tambah Baris
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse" id="journalTable">
+                        <thead>
+                            <tr class="bg-slate-100/75 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th class="py-3 px-4 w-5/12">Akun</th>
+                                <th class="py-3 px-4 w-3/12 text-right">Debit (Rp)</th>
+                                <th class="py-3 px-4 w-3/12 text-right">Kredit (Rp)</th>
+                                <th class="py-3 px-3 w-1/12 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journalTableBody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Rows will be injected here via JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-50 border-t border-slate-200 font-bold text-slate-700">
+                                <td class="py-3 px-4 text-right uppercase text-xs tracking-wider">Total:</td>
+                                <td class="py-3 px-4 text-right font-mono" id="totalDebitCell">Rp 0</td>
+                                <td class="py-3 px-4 text-right font-mono" id="totalCreditCell">Rp 0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="balanceMessage" class="text-xs font-medium text-rose-600">
+                    * Total debit dan kredit belum seimbang. Tombol submit terkunci.
+                </div>
+                <button type="submit" id="submitBtn" disabled 
+                    class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm bg-slate-300 text-slate-500 cursor-not-allowed">
+                    Simpan Jurnal
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Custom Modal for Alerts (No native alert) -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl text-center space-y-4">
+            <div id="modalIconContainer" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-emerald-100 text-emerald-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Berhasil!</h3>
+            <p id="modalMessage" class="text-sm text-slate-600">Jurnal akuntansi berhasil disimpan.</p>
+            <button type="button" id="modalCloseBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Daftar akun yang tersedia sesuai ketentuan
+        const availableAccounts = [
+            { code: "101", name: "101-Kas" },
+            { code: "102", name: "102-Piutang" },
+            { code: "201", name: "201-Utang" },
+            { code: "301", name: "301-Modal" },
+            { code: "401", name: "401-Pendapatan" },
+            { code: "501", name: "501-Beban" }
+        ];
+
+        const tableBody = document.getElementById('journalTableBody');
+        const addRowBtn = document.getElementById('addRowBtn');
+        const totalDebitCell = document.getElementById('totalDebitCell');
+        const totalCreditCell = document.getElementById('totalCreditCell');
+        const balanceStatusBadge = document.getElementById('balanceStatusBadge');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const submitBtn = document.getElementById('submitBtn');
+        const balanceMessage = document.getElementById('balanceMessage');
+        const journalForm = document.getElementById('journalForm');
+
+        // Modal elements
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        // Set default date to today
+        document.getElementById('txDate').valueAsDate = new Date();
+
+        // Helper function to format currency (IDR)
+        function formatIDR(amount) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+        }
+
+        // Create a single row HTML structure
+        function createJournalRow(accountVal = "", debitVal = "", creditVal = "") {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50/60 transition-colors";
+
+            // Account Dropdown cell
+            const tdAccount = document.createElement('td');
+            tdAccount.className = "py-2.5 px-4";
+            let optionsHtml = `<option value="" disabled ${!accountVal ? 'selected' : ''}>Pilih Akun...</option>`;
+            availableAccounts.forEach(acc => {
+                const isSelected = accountVal === acc.code ? 'selected' : '';
+                optionsHtml += `<option value="${acc.code}" ${isSelected}>${acc.name}</option>`;
+            });
+            tdAccount.innerHTML = `<select class="account-select w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>${optionsHtml}</select>`;
+
+            // Debit cell
+            const tdDebit = document.createElement('td');
+            tdDebit.className = "py-2.5 px-4 text-right";
+            tdDebit.innerHTML = `<input type="number" min="0" step="any" placeholder="0" value="${debitVal}" class="debit-input w-full text-right rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono">`;
+
+            // Credit cell
+            const tdCredit = document.createElement('td');
+            tdCredit.className = "py-2.5 px-4 text-right";
+            tdCredit.innerHTML = `<input type="number" min="0" step="any" placeholder="0" value="${creditVal}" class="credit-input w-full text-right rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono">`;
+
+            // Action Delete cell
+            const tdAction = document.createElement('td');
+            tdAction.className = "py-2.5 px-3 text-center";
+            tdAction.innerHTML = `<button type="button" class="delete-row-btn text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors" title="Hapus Baris">
+                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>`;
+
+            tr.appendChild(tdAccount);
+            tr.appendChild(tdDebit);
+            tr.appendChild(tdCredit);
+            tr.appendChild(tdAction);
+
+            // Attach event listeners for mutual exclusivity and recalculation
+            const debitInput = tr.querySelector('.debit-input');
+            const creditInput = tr.querySelector('.credit-input');
+            const deleteBtn = tr.querySelector('.delete-row-btn');
+
+            debitInput.addEventListener('input', () => {
+                if (debitInput.value.trim() !== "" && Number(debitInput.value) > 0) {
+                    creditInput.value = "";
+                    creditInput.disabled = true;
+                    creditInput.classList.add('bg-slate-100', 'text-slate-400');
+                } else {
+                    creditInput.disabled = false;
+                    creditInput.classList.remove('bg-slate-100', 'text-slate-400');
+                }
+                calculateTotals();
+            });
+
+            creditInput.addEventListener('input', () => {
+                if (creditInput.value.trim() !== "" && Number(creditInput.value) > 0) {
+                    debitInput.value = "";
+                    debitInput.disabled = true;
+                    debitInput.classList.add('bg-slate-100', 'text-slate-400');
+                } else {
+                    debitInput.disabled = false;
+                    debitInput.classList.remove('bg-slate-100', 'text-slate-400');
+                }
+                calculateTotals();
+            });
+
+            deleteBtn.addEventListener('click', () => {
+                // Pastikan minimal ada 2 baris agar jurnal akuntansi tetap valid
+                if (tableBody.querySelectorAll('tr').length > 2) {
+                    tr.remove();
+                    calculateTotals();
+                } else {
+                    showModalMessage("Minimal harus ada 2 baris jurnal (Debit & Kredit).", "Peringatan");
+                }
+            });
+
+            // Initialize field state if prepopulated
+            if (debitInput.value && Number(debitInput.value) > 0) {
+                creditInput.value = "";
+                creditInput.disabled = true;
+                creditInput.classList.add('bg-slate-100', 'text-slate-400');
+            } else if (creditInput.value && Number(creditInput.value) > 0) {
+                debitInput.value = "";
+                debitInput.disabled = true;
+                debitInput.classList.add('bg-slate-100', 'text-slate-400');
+            }
+
+            return tr;
+        }
+
+        // Add initial rows (standard minimum 2 rows for double-entry bookkeeping)
+        function initDefaultRows() {
+            tableBody.appendChild(createJournalRow());
+            tableBody.appendChild(createJournalRow());
+            calculateTotals();
+        }
+
+        // Calculate total debit and total credit dynamically
+        function calculateTotals() {
+            let totalDebit = 0;
+            let totalCredit = 0;
+
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const debitVal = parseFloat(row.querySelector('.debit-input').value) || 0;
+                const creditVal = parseFloat(row.querySelector('.credit-input').value) || 0;
+                totalDebit += debitVal;
+                totalCredit += creditVal;
+            });
+
+            totalDebitCell.textContent = formatIDR(totalDebit);
+            totalCreditCell.textContent = formatIDR(totalCredit);
+
+            // Check if balanced (total debit === total credit and greater than 0)
+            const isBalanced = (totalDebit > 0) && (totalDebit === totalCredit);
+
+            if (isBalanced) {
+                balanceStatusBadge.className = "px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-500 text-white shadow-sm flex items-center gap-1.5";
+                statusText.textContent = "BALANCED";
+                
+                submitBtn.disabled = false;
+                submitBtn.className = "w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer";
+                balanceMessage.textContent = "✓ Total debit dan kredit seimbang. Jurnal siap disimpan.";
+                balanceMessage.className = "text-xs font-medium text-emerald-600";
+            } else {
+                balanceStatusBadge.className = "px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-rose-500 text-white shadow-sm flex items-center gap-1.5";
+                statusText.textContent = "UNBALANCED";
+
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm bg-slate-300 text-slate-500 cursor-not-allowed";
+                balanceMessage.textContent = "* Total debit dan kredit belum seimbang atau bernilai nol.";
+                balanceMessage.className = "text-xs font-medium text-rose-600";
+            }
+        }
+
+        // Add row button click listener
+        addRowBtn.addEventListener('click', () => {
+            tableBody.appendChild(createJournalRow());
+        });
+
+        // Modal helpers
+        function showModalMessage(msg, title = "Berhasil!") {
+            modalMessage.textContent = msg;
+            document.getElementById('modalTitle').textContent = title;
+            customModal.classList.remove('hidden');
+            customModal.classList.add('flex');
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            customModal.classList.remove('flex');
+            customModal.classList.add('hidden');
+        });
+
+        // Form submission handler
+        journalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Final validation before submission
+            let totalDebit = 0;
+            let totalCredit = 0;
+            const rows = tableBody.querySelectorAll('tr');
+            
+            let hasEmptyAccount = false;
+            rows.forEach(row => {
+                const accSelect = row.querySelector('.account-select').value;
+                if (!accSelect) hasEmptyAccount = true;
+                totalDebit += parseFloat(row.querySelector('.debit-input').value) || 0;
+                totalCredit += parseFloat(row.querySelector('.credit-input').value) || 0;
+            });
+
+            if (hasEmptyAccount) {
+                showModalMessage("Semua baris harus memiliki akun yang dipilih.", "Perhatian");
+                return;
+            }
+
+            if (totalDebit !== totalCredit || totalDebit === 0) {
+                showModalMessage("Total debit dan kredit harus sama dan tidak boleh nol.", "Gagal Simpan");
+                return;
+            }
+
+            // Simulate successful entry save
+            showModalMessage("Data entri jurnal akuntansi berhasil disimpan ke sistem!", "Sukses");
+            
+            // Reset form optionally or keep for review
+            journalForm.reset();
+            document.getElementById('txDate').valueAsDate = new Date();
+            tableBody.innerHTML = "";
+            initDefaultRows();
+        });
+
+        // Initialize application on load
+        window.onload = function() {
+            initDefaultRows();
+        };
+    </script>
+</body>
+</html>
