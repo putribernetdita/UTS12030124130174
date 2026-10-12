@@ -5,9 +5,23 @@
 **Semester:** Gasal 2026/2027  
 
 ## 👤 Identitas
-- **Nama:** [Putri Bernetdita]
-- **NIM:** [12030124130174]
-- **Kelas:** [D]
+- **Nama:** Putri Bernetdita
+- **NIM:** 12030124130174
+- **Kelas:** D
+
+---
+
+## 📊 Entity Relationship Diagram (ERD)
+
+Berikut ERD modul General Ledger yang digunakan pada Soal 1:
+
+![ERD General Ledger](SOAL-1/ERD.png)
+
+**Relasi antar entitas:**
+- `chart_of_accounts` (1) → (N) `journal_lines` — satu akun dipakai di banyak baris jurnal
+- `journal_headers` (1) → (N) `journal_lines` — satu header memiliki banyak baris detail
+
+---
 
 ## 📂 Struktur Repositori
 
@@ -15,7 +29,7 @@
 - [ERD.png](SOAL-1/ERD.png) — Entity Relationship Diagram
 - [ddl.sql](SOAL-1/ddl.sql) — DDL PostgreSQL
 - [analisis.md](SOAL-1/analisis.md) — Analisis Audit Trail & 3NF
-- [bukti-uji/](SOAL-1/Bukti%20Uji/) — Screenshot uji constraint
+- [Bukti Uji/](SOAL-1/Bukti%20Uji/) — Screenshot uji constraint
 
 ### SOAL 2 — Trigger Persediaan & Concurrency (40%)
 - [trigger.sql](SOAL-2/trigger.sql) — Trigger otomasi stok
@@ -29,9 +43,13 @@
 - [psak_verification.md](SOAL-3/psak_verification.md) — Verifikasi PSAK
 - [audit_trail.md](SOAL-3/audit_trail.md) — Penjelasan immutability
 
+---
+
 ## 🔗 Live Demo
 Form entri jurnal dapat diakses di:  
 [GitHub Pages URL setelah di-deploy]
+
+---
 
 ## 🛠️ Tools yang Digunakan
 - PostgreSQL / Supabase
@@ -40,6 +58,8 @@ Form entri jurnal dapat diakses di:
 - dbdiagram.io (ERD)
 - Tailwind CSS
 - GitHub Pages
+
+---
 
 ## 📝 Cara Menjalankan
 
